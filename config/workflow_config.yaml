@@ -1,0 +1,31 @@
+# Workflow Timing Assumptions (seconds)
+workflow_stages:
+  member_verification:
+    traditional: 45
+    ai_assisted: 10
+  claim_lookup:
+    traditional: 60
+    ai_assisted: 5
+  coverage_lookup:
+    traditional: 90
+    ai_assisted: 15
+  prior_auth_verification:
+    traditional: 120
+    ai_assisted: 20
+  roi_verification:
+    traditional: 45
+    ai_assisted: 5
+  claim_explanation:
+    traditional: 180
+    ai_assisted: 45
+  recommended_next_actions:
+    traditional: 60
+    ai_assisted: 10
+
+# Business Impact Assumptions
+impact_assumptions:
+  fcr_improvement_pct: 22          # Percent increase in First Call Resolution
+  repeat_call_reduction_pct: 18    # Percent reduction in repeat calls
+  preventable_denials_reduction_pct: 15 # Percent reduction in preventable denials
+  annual_call_volume: 1200000      # Estimated annual call volume
+  cost_per_second: 0.02            # Fully burdened agent cost per second ($72/hr)

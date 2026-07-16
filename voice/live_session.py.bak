@@ -1,0 +1,54 @@
+import os
+import asyncio
+from contextlib import asynccontextmanager
+from google import genai
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+
+class GeminiLiveSessionManager:
+    """
+    Manages the connection and lifecycle of a Gemini Multimodal Live session.
+    """
+    def __init__(self):
+        # Configuration
+        self.project_id = os.getenv("PROJECT_ID", "qwiklabs-gcp-01-f01da7845174")
+        self.location = os.getenv("LOCATION", "us-central1")
+        self.api_key = os.getenv("GOOGLE_API_KEY")
+        
+        # Use gemini-2.0-flash-exp which is the primary model for Live API
+        self.model_id = "gemini-2.0-flash-exp"
+        
+        # Initialize GenAI Client
+        # Using the provided GOOGLE_API_KEY for standard Google AI (AI Studio) endpoint
+        print(f"Initializing Google AI client with provided API key...")
+        self.client = genai.Client(
+            api_key=self.api_key,
+            http_options={'api_version': 'v1beta'}
+        )
+
+    @asynccontextmanager
+    async def connect(self, system_instruction=None):
+        """
+        Provides an async context manager for the Multimodal Live API connection.
+        """
+        config = {
+            "generation_config": {
+                "response_modalities": ["AUDIO"]
+            }
+        }
+        if system_instruction:
+            config["system_instruction"] = system_instruction
+
+        print(f"Connecting to Gemini Live (Model: {self.model_id})...")
+        try:
+            async with self.client.aio.live.connect(
+                model=self.model_id,
+                config=config
+            ) as session:
+                print("Connected to Gemini Live session.")
+                yield session
+        except Exception as e:
+            print(f"Connection failed: {e}")
+            raise

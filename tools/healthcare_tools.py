@@ -138,3 +138,10 @@ def calculate_claim_risk(claim_id: str):
         "risk_level": "High" if risk_score >= 70 else "Medium" if risk_score >= 30 else "Low",
         "factors": factors
     }
+
+from tools.business_impact import calculate_business_impact
+
+def get_business_impact_metrics():
+    """Retrieve summarized business impact metrics and ROI data for AI transformation."""
+    data = calculate_business_impact()
+    return data['summary']

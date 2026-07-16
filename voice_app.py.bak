@@ -1,0 +1,140 @@
+import asyncio
+import os
+import sys
+import traceback
+from voice.live_session import GeminiLiveSessionManager
+from voice.adk_bridge import run_orchestrator
+from dotenv import load_dotenv
+
+load_dotenv()
+
+# Attempt to import PyAudio for microphone support
+try:
+    import pyaudio
+    HAS_PYAUDIO = True
+except ImportError:
+    HAS_PYAUDIO = False
+
+# Audio Configuration
+FORMAT = pyaudio.paInt16 if HAS_PYAUDIO else None
+CHANNELS = 1
+RATE = 16000
+CHUNK = 512
+
+class VoiceApp:
+    def __init__(self):
+        self.manager = GeminiLiveSessionManager()
+        self.p = pyaudio.PyAudio() if HAS_PYAUDIO else None
+        self.audio_stream = None
+        self.has_mic = False
+
+        if HAS_PYAUDIO:
+            try:
+                # Check if any input devices exist
+                if self.p.get_device_count() > 0:
+                    self.has_mic = True
+            except:
+                self.has_mic = False
+
+    async def start(self):
+        system_instruction = (
+            "You are the voice interface for a Healthcare Member Services system. "
+            "Your job is to transcribe user audio and speak back the responses provided by the backend system. "
+            "Be professional, empathetic, and clear."
+        )
+
+        try:
+            print("Attempting to connect to Gemini Live...")
+            async with self.manager.connect(system_instruction=system_instruction) as session:
+                tasks = [
+                    asyncio.create_task(self.receive_messages_loop(session))
+                ]
+                
+                if self.has_mic:
+                    tasks.append(asyncio.create_task(self.send_audio_loop(session)))
+                else:
+                    tasks.append(asyncio.create_task(self.text_input_loop(session)))
+
+                await asyncio.gather(*tasks)
+        except Exception as e:
+            print(f"\n[Environment Restricted]: {e}")
+            print("The Multimodal Live API is blocked in this project.")
+            print(">>> Starting in STANDALONE TERMINAL MODE (Bypassing Gemini Live Relay).")
+            
+            # Run the terminal loop without a Gemini session
+            await self.text_input_loop(None)
+        finally:
+            await self.cleanup()
+
+    async def text_input_loop(self, session):
+        """Terminal input loop. Works with or without a Gemini session."""
+        print("\nStandalone Mode active.")
+        print("Type your message below and press Enter (Ctrl+C to quit).\n")
+        
+        loop = asyncio.get_event_loop()
+        while True:
+            try:
+                user_input = await loop.run_in_executor(None, sys.stdin.readline)
+                if not user_input: break
+                user_input = user_input.strip()
+                if not user_input: continue
+                
+                print(f"\n[User]: {user_input}")
+                print(">>> Querying ADK Orchestrator...")
+                adk_response = await run_orchestrator(user_input)
+                print(f"[ADK Response]: {adk_response}")
+                
+                # Only try to send to session if one was successfully created
+                if session:
+                    try:
+                        await session.send(adk_response, end_of_turn=True)
+                    except:
+                        pass
+            except EOFError:
+                break
+
+    async def send_audio_loop(self, session):
+        """Captures microphone audio and sends it to Gemini Live."""
+        try:
+            self.audio_stream = self.p.open(
+                format=FORMAT, channels=CHANNELS, rate=RATE, input=True, frames_per_buffer=CHUNK
+            )
+            print("\n>>> Voice Session Active. Speak now (Ctrl+C to quit)...")
+            while True:
+                data = self.audio_stream.read(CHUNK, exception_on_overflow=False)
+                await session.send(data, end_of_turn=False)
+                await asyncio.sleep(0)
+        except Exception as e:
+            print(f"Microphone error: {e}")
+
+    async def receive_messages_loop(self, session):
+        """Receives events from Gemini Live."""
+        async for message in session.receive():
+            if message.server_content and message.server_content.user_turn:
+                for part in message.server_content.user_turn.parts:
+                    if part.text:
+                        user_text = part.text.strip()
+                        print(f"\n[User Transcript]: {user_text}")
+                        print(">>> Querying ADK Orchestrator...")
+                        adk_response = await run_orchestrator(user_text)
+                        print(f"[ADK Response]: {adk_response}")
+                        await session.send(adk_response, end_of_turn=True)
+
+            if message.server_content and message.server_content.model_turn:
+                for part in message.server_content.model_turn.parts:
+                    if part.text:
+                        print(f"[Gemini Speaking]: {part.text}")
+
+    async def cleanup(self):
+        if self.audio_stream:
+            self.audio_stream.stop_stream()
+            self.audio_stream.close()
+        if self.p:
+            self.p.terminate()
+
+if __name__ == "__main__":
+    app = VoiceApp()
+    try:
+        asyncio.run(app.start())
+    except KeyboardInterrupt:
+        print("\nClosing voice application...")

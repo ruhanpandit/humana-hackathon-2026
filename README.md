@@ -49,3 +49,38 @@ Ensure `google-adk` is installed and run:
 ```bash
 python3 main.py
 ```
+
+## Gemini Live Voice Integration
+
+A voice layer has been added to allow real-time interaction via the Gemini Multimodal Live API.
+
+### Setup
+
+1. Update package index and install system dependencies (for audio):
+   ```bash
+   sudo apt-get update
+   sudo apt-get install -y portaudio19-dev
+   ```
+2. Install Python dependencies:
+   ```bash
+   pip install pyaudio google-genai
+   ```
+3. Ensure your `.env` contains:
+   - `PROJECT_ID`: Your GCP Project ID.
+   - `LOCATION`: GCP region (e.g., `us-central1`).
+   - `GOOGLE_API_KEY`: A valid API key if not using Vertex AI ADC.
+
+> **Note on Cloud Shell**: Real-time audio capture via `PyAudio` requires access to local microphone hardware. If running in Google Cloud Shell, you may need to run the application in a local environment or use a tool to bridge your local audio to the remote session.
+
+### Running Voice Mode
+
+Execute the voice application:
+
+```bash
+python3 voice_app.py
+```
+
+### Architecture
+- **Voice Interface**: `voice_app.py` manages microphone audio and Gemini Live session.
+- **Session Manager**: `voice/live_session.py` handles the connection to the Multimodal Live API.
+- **ADK Bridge**: `voice/adk_bridge.py` routes transcripts to the existing Healthcare Orchestrator and returns synthesized text to be spoken.
