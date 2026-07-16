@@ -1,0 +1,9 @@
+cpt_code,description,category
+83036,Hemoglobin A1c (HbA1c) Test,Laboratory
+82962,Blood Glucose Test,Laboratory
+80053,Comprehensive Metabolic Panel,Laboratory
+99213,"Office Visit - Established, Level 3",Evaluation and Management
+99214,"Office Visit - Established, Level 4",Evaluation and Management
+70551,MRI Brain without Contrast,Radiology
+70553,MRI Brain with and without Contrast,Radiology
+93000,EKG (Electrocardiogram),Cardiology
