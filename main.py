@@ -1,6 +1,19 @@
 import asyncio
+import os
+from dotenv import load_dotenv
 from google.adk.runners import InMemoryRunner
+from google.adk import Agent
 from agents.orchestrator import orchestrator_agent
+
+# Load environment variables
+load_dotenv()
+
+# Use Vertex AI backend by specifying the full model path
+# This resolves "PERMISSION_DENIED" errors on the public Gemini API
+PROJECT_ID = "qwiklabs-gcp-01-f01da7845174"
+LOCATION = "us-central1"
+MODEL_PATH = f"projects/{PROJECT_ID}/locations/{LOCATION}/publishers/google/models/gemini-2.5-flash"
+Agent.set_default_model(MODEL_PATH)
 
 async def main():
     # Initialize the runner with our root orchestrator
