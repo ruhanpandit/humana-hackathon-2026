@@ -47,5 +47,5 @@ The following tools are available to the agents:
 Ensure `google-adk` is installed and run:
 
 ```bash
-python3 main.py
+python3 app.py
 ```
