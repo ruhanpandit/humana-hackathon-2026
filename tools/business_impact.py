@@ -1,124 +1,89 @@
-import yaml
-import os
+import streamlit as st
+from tools.business_impact import calculate_business_impact
 
-def load_config():
-    """Loads the workflow and impact assumptions from the configuration file."""
-    # Assuming the config is in ../config/workflow_config.yaml relative to this file
-    config_path = os.path.join(os.path.dirname(__file__), '..', 'config', 'workflow_config.yaml')
+def render_business_impact_dashboard():
+    """
+    Renders the Business Impact dashboard using Streamlit components.
+    This can be called from a main Streamlit app.
+    """
+    st.header("📈 Business Impact Analysis")
+    st.markdown("Comparing Traditional vs. AI-Powered Healthcare Workflows")
+    
+    data = calculate_business_impact()
+    
+    # KPI Cards
+    st.subheader("Key Performance Indicators")
+    cols = st.columns(len(data['kpis']))
+    for i, kpi in enumerate(data['kpis']):
+        with cols[i]:
+            st.metric(
+                label=kpi['label'],
+                value=kpi['value'],
+                delta=kpi['delta'],
+                help=kpi['description']
+            )
+            
+    st.divider()
+    
+    # Financial Impact
+    st.subheader("Estimated Annual Impact")
+    f1, f2, f3 = st.columns(3)
+    financials = data['financials']
+    f1.metric("Annual Financial Savings", f"${financials['annual_financial_savings']:,.2f}")
+    f2.metric("Annual Agent Hours Reclaimed", f"{financials['annual_hours_saved']:,.0f} hrs")
+    f3.metric("Operating Cost Reduction", f"{financials['cost_reduction_pct']}%")
+    
+    st.divider()
+    
+    # Workflow Comparison Chart
+    st.subheader("Workflow Stage Breakdown (Seconds)")
+    stages = data['workflow_comparison']['stages']
+    
+    # Prepare data for horizontal bar chart
+    # Streamlit's native bar_chart is a bit limited for grouped bars, 
+    # but we can use st.dataframe or st.bar_chart with prepared data.
+    chart_labels = [s['stage'] for s in stages]
+    trad_times = [s['traditional'] for s in stages]
+    ai_times = [s['ai_assisted'] for s in stages]
+    
+    # For a horizontal bar chart in Streamlit, we often use Plotly or Altair,
+    # but since we want to avoid extra dependencies if possible, we'll suggest using Altair.
     try:
-        with open(config_path, 'r') as f:
-            return yaml.safe_load(f)
-    except FileNotFoundError:
-        # Fallback defaults if config is missing
-        return {
-            "workflow_stages": {
-                "member_verification": {"traditional": 45, "ai_assisted": 10},
-                "claim_lookup": {"traditional": 60, "ai_assisted": 5},
-                "coverage_lookup": {"traditional": 90, "ai_assisted": 15},
-                "prior_auth_verification": {"traditional": 120, "ai_assisted": 20},
-                "roi_verification": {"traditional": 45, "ai_assisted": 5},
-                "claim_explanation": {"traditional": 180, "ai_assisted": 45},
-                "recommended_next_actions": {"traditional": 60, "ai_assisted": 10}
-            },
-            "impact_assumptions": {
-                "fcr_improvement_pct": 22,
-                "repeat_call_reduction_pct": 18,
-                "preventable_denials_reduction_pct": 15,
-                "annual_call_volume": 1200000,
-                "cost_per_second": 0.02
-            }
-        }
-
-def calculate_business_impact():
-    """
-    Calculates all business impact metrics based on configurable assumptions.
-    Returns a dictionary structured for easy consumption by a dashboard.
-    """
-    config = load_config()
-    stages = config['workflow_stages']
-    impact = config['impact_assumptions']
-    
-    total_traditional = 0
-    total_ai = 0
-    comparison_data = []
-    
-    # Requirement 1 & 2: Process stages and handle times
-    for stage_key, times in stages.items():
-        trad = times['traditional']
-        ai = times['ai_assisted']
-        total_traditional += trad
-        total_ai += ai
-        comparison_data.append({
-            "stage": stage_key.replace('_', ' ').title(),
-            "traditional": trad,
-            "ai_assisted": ai,
-            "saved": trad - ai,
-            "reduction_pct": round(((trad - ai) / trad * 100), 1) if trad > 0 else 0
+        import pandas as pd
+        import altair as alt
+        
+        df = pd.DataFrame({
+            'Stage': chart_labels * 2,
+            'Duration (s)': trad_times + ai_times,
+            'Type': ['Traditional'] * len(chart_labels) + ['AI-Assisted'] * len(chart_labels)
         })
         
-    # Requirement 3: Calculations
-    time_saved_per_call = total_traditional - total_ai
-    aht_reduction_pct = (time_saved_per_call / total_traditional) * 100 if total_traditional > 0 else 0
-    
-    annual_volume = impact['annual_call_volume']
-    cost_per_sec = impact['cost_per_second']
-    
-    total_annual_hours_saved = (time_saved_per_call * annual_volume) / 3600
-    total_annual_financial_savings = time_saved_per_call * annual_volume * cost_per_sec
-    
-    # Requirement 4 & 5: Return structured data for KPIs and Charts
-    return {
-        "kpis": [
-            {
-                "label": "Average Handle Time Saved",
-                "value": f"{round(aht_reduction_pct, 1)}%",
-                "delta": "vs Traditional",
-                "description": "Reduction in total interaction time"
-            },
-            {
-                "label": "Time Saved Per Call",
-                "value": f"{time_saved_per_call}s",
-                "delta": f"-{round(aht_reduction_pct, 1)}%",
-                "description": "Total seconds saved per interaction"
-            },
-            {
-                "label": "First Call Resolution Improvement",
-                "value": f"+{impact['fcr_improvement_pct']}%",
-                "delta": "Estimated",
-                "description": "Projected increase in single-interaction resolution"
-            },
-            {
-                "label": "Repeat Call Reduction",
-                "value": f"-{impact['repeat_call_reduction_pct']}%",
-                "delta": "Estimated",
-                "description": "Projected decrease in follow-up inquiries"
-            },
-            {
-                "label": "Preventable Denials Reduction",
-                "value": f"-{impact['preventable_denials_reduction_pct']}%",
-                "delta": "Estimated",
-                "description": "Reduction in administrative errors"
-            },
-            {
-                "label": "STARs Gap Closure Improvement",
-                "value": f"+{impact['stars_gap_closure_improvement']} pp",
-                "delta": "Target",
-                "description": "Projected improvement in key STARs measures"
-            }
-        ],
-        "financials": {
-            "annual_hours_saved": round(total_annual_hours_saved, 0),
-            "annual_financial_savings": round(total_annual_financial_savings, 2),
-            "cost_reduction_pct": round(aht_reduction_pct, 1)
-        },
-        "workflow_comparison": {
-            "traditional_total": total_traditional,
-            "ai_total": total_ai,
-            "stages": comparison_data
-        }
-    }
+        chart = alt.Chart(df).mark_bar().encode(
+            y=alt.Y('Stage:N', sort=None),
+            x='Duration (s):Q',
+            color='Type:N',
+            row='Type:N'
+        ).properties(height=150, width=600)
+        
+        st.altair_chart(chart, use_container_width=True)
+        
+    except ImportError:
+        # Fallback to simple bar charts if pandas/altair are missing
+        st.write("Traditional Workflow Duration")
+        st.bar_chart(dict(zip(chart_labels, trad_times)))
+        st.write("AI-Assisted Workflow Duration")
+        st.bar_chart(dict(zip(chart_labels, ai_times)))
+
+    # Detail Table
+    with st.expander("View Workflow Assumption Details"):
+        st.table(stages)
 
 if __name__ == "__main__":
-    import json
-    results = calculate_business_impact()
-    print(json.dumps(results, indent=2))
+    # Mocking st for local testing without streamlit installed
+    class MockSt:
+        def __getattr__(self, name):
+            def mock_func(*args, **kwargs):
+                print(f"ST.{name.upper()}: {args} {kwargs}")
+            return mock_func
+    st = MockSt()
+    render_business_impact_dashboard()

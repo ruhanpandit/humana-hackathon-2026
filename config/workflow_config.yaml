@@ -23,6 +23,14 @@ workflow_stages:
     traditional: 60
     ai_assisted: 10
 
+impact_assumptions:
+  fcr_improvement_pct: 22
+  repeat_call_reduction_pct: 18
+  preventable_denials_reduction_pct: 15
+  stars_gap_closure_improvement: 8
+  annual_call_volume: 1200000
+  cost_per_second: 0.02
+
 # Business Impact Assumptions
 # Cost based on fully burdened rate for specialized healthcare agents ($42/hr)
 # Stats derived from synthetic dataset analysis:
@@ -30,10 +38,3 @@ workflow_stages:
 # - Denial Rate: 24.1%
 # - Preventable (Fixable) Denials: 73.6%
 # - ROI Expiration Rate: 12.2%
-impact_assumptions:
-  fcr_improvement_pct: 25          # Target: 77% (Derived from FCR potential in data)
-  repeat_call_reduction_pct: 20    # Based on 73.6% fixable denial rate automation
-  preventable_denials_reduction_pct: 18 # Target reduction in the 73.6% fixable segment
-  stars_gap_closure_improvement: 4.0 # Percentage point improvement in key STARs measures
-  annual_call_volume: 1200000      # Specialized Desk Estimate
-  cost_per_second: 0.01166         # Fully burdened agent cost ($42/hr)
