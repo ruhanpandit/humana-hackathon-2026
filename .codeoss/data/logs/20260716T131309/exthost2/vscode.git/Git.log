@@ -1,0 +1,50 @@
+2026-07-16 13:14:15.000 [info] [main] Log level: Info
+2026-07-16 13:14:15.000 [info] [main] Validating found git in: "git"
+2026-07-16 13:14:15.000 [info] [main] Using git "2.43.0" from "git"
+2026-07-16 13:14:15.000 [info] [Model][doInitialScan] Initial repository scan started
+2026-07-16 13:14:15.000 [warning] [Model][traverseWorkspaceFolder] Unable to read workspace folder '/home/lost+found': Error: EACCES: permission denied, scandir '/home/lost+found'
+2026-07-16 13:14:15.000 [info] > git rev-parse --show-toplevel [2098ms]
+2026-07-16 13:14:15.000 [info] fatal: not a git repository (or any parent up to mount point /)
+Stopping at filesystem boundary (GIT_DISCOVERY_ACROSS_FILESYSTEM not set).
+2026-07-16 13:14:15.000 [info] > git rev-parse --show-toplevel [5ms]
+2026-07-16 13:14:15.000 [info] fatal: not a git repository (or any parent up to mount point /)
+Stopping at filesystem boundary (GIT_DISCOVERY_ACROSS_FILESYSTEM not set).
+2026-07-16 13:14:15.000 [info] [Model][doInitialScan] Initial repository scan completed - repositories (0), closed repositories (0), parent repositories (0), unsafe repositories (0)
+2026-07-16 13:14:30.223 [info] > git rev-parse --show-toplevel [31ms]
+2026-07-16 13:14:30.227 [info] fatal: not a git repository (or any parent up to mount point /)
+Stopping at filesystem boundary (GIT_DISCOVERY_ACROSS_FILESYSTEM not set).
+2026-07-16 13:14:36.100 [info] > git rev-parse --show-toplevel [25ms]
+2026-07-16 13:14:36.102 [info] fatal: not a git repository (or any parent up to mount point /)
+Stopping at filesystem boundary (GIT_DISCOVERY_ACROSS_FILESYSTEM not set).
+2026-07-16 13:14:46.365 [info] > git rev-parse --show-toplevel [21ms]
+2026-07-16 13:14:46.592 [info] > git rev-parse --git-dir --git-common-dir --show-superproject-working-tree [48ms]
+2026-07-16 13:14:46.944 [info] [Model][openRepository] Opened repository (path): /home/student_03_c0686096dc2f/.gemini/history/home
+2026-07-16 13:14:46.945 [info] [Model][openRepository] Opened repository (real path): /home/student_03_c0686096dc2f/.gemini/history/home
+2026-07-16 13:14:46.945 [info] [Model][openRepository] Opened repository (kind): repository
+2026-07-16 13:14:47.071 [info] [Git][getRemotes] No remotes found in the git config file
+2026-07-16 13:14:47.078 [info] > git config --get commit.template [67ms]
+2026-07-16 13:14:47.114 [info] > git for-each-ref --format=%(refname)%00%(upstream:short)%00%(objectname)%00%(upstream:track)%00%(upstream:remotename)%00%(upstream:remoteref) refs/heads/main refs/remotes/main [42ms]
+2026-07-16 13:14:47.206 [info] > git status -z -uall [35ms]
+2026-07-16 13:14:47.214 [info] > git for-each-ref --sort -committerdate --format %(refname)%00%(objectname)%00%(*objectname) [12ms]
+2026-07-16 13:14:47.300 [info] > git for-each-ref --format=%(refname)%00%(upstream:short)%00%(objectname)%00%(upstream:track)%00%(upstream:remotename)%00%(upstream:remoteref) refs/heads/main refs/remotes/main [43ms]
+2026-07-16 13:14:47.366 [info] > git config --get --local branch.main.vscode-merge-base [26ms]
+2026-07-16 13:14:47.373 [warning] [Git][config] git config failed: Failed to execute git
+2026-07-16 13:14:47.418 [info] > git config --get commit.template [119ms]
+2026-07-16 13:14:47.448 [info] [Git][getRemotes] No remotes found in the git config file
+2026-07-16 13:14:47.461 [info] > git reflog main --grep-reflog=branch: Created from *. [43ms]
+2026-07-16 13:14:47.466 [info] > git for-each-ref --format=%(refname)%00%(upstream:short)%00%(objectname)%00%(upstream:track)%00%(upstream:remotename)%00%(upstream:remoteref) refs/heads/main refs/remotes/main [18ms]
+2026-07-16 13:14:47.533 [info] > git status -z -uall [36ms]
+2026-07-16 13:14:47.533 [info] > git for-each-ref --sort -committerdate --format %(refname)%00%(objectname)%00%(*objectname) [7ms]
+2026-07-16 13:15:02.213 [info] > git config --get commit.template [24ms]
+2026-07-16 13:15:02.277 [info] [Git][getRemotes] No remotes found in the git config file
+2026-07-16 13:15:02.281 [info] > git for-each-ref --format=%(refname)%00%(upstream:short)%00%(objectname)%00%(upstream:track)%00%(upstream:remotename)%00%(upstream:remoteref) refs/heads/main refs/remotes/main [3ms]
+2026-07-16 13:15:02.325 [info] > git status -z -uall [25ms]
+2026-07-16 13:15:02.328 [info] > git for-each-ref --sort -committerdate --format %(refname)%00%(objectname)%00%(*objectname) [4ms]
+2026-07-16 13:28:01.612 [info] > git log --format=%H%n%aN%n%aE%n%at%n%ct%n%P%n%D%n%B -z --shortstat --diff-merges=first-parent -n50 --skip=0 --topo-order --decorate=full --stdin [66ms]
+2026-07-16 13:28:01.620 [info] > git rev-parse --show-toplevel [12ms]
+2026-07-16 13:28:01.620 [info] fatal: not a git repository (or any parent up to mount point /)
+Stopping at filesystem boundary (GIT_DISCOVERY_ACROSS_FILESYSTEM not set).
+2026-07-16 13:28:02.073 [info] > git check-ignore -v -z --stdin [2ms]
+2026-07-16 13:28:07.493 [info] > git log --format=%H%n%aN%n%aE%n%at%n%ct%n%P%n%D%n%B -z --shortstat --diff-merges=first-parent -n50 --skip=0 --topo-order --decorate=full --stdin [2ms]
+2026-07-16 13:51:49.603 [warning] [Model][getRepositoryExact] Failed to get repository realpath for: "/home/student_03_c0686096dc2f/.npm/_cacache/tmp/git-clonenUbh40/". Error:Error: ENOENT: no such file or directory, realpath '/home/student_03_c0686096dc2f/.npm/_cacache/tmp/git-clonenUbh40/'
+2026-07-16 13:51:49.812 [warning] [Model][getRepositoryExact] Failed to get repository realpath for: "/home/student_03_c0686096dc2f/.npm/_cacache/tmp/git-cloneciuAER/". Error:Error: ENOENT: no such file or directory, realpath '/home/student_03_c0686096dc2f/.npm/_cacache/tmp/git-cloneciuAER/'

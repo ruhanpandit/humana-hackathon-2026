@@ -1,0 +1,6 @@
+[Error - 2:13:53 PM] (node:2038) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+[Error - 2:14:05 PM] Failed to load entities from /home/student_03_c0686096dc2f/.npm/_cacache/tmp/git-cloneXbdr2v/mcp/package-lock.json: Error: ENOENT: no such file or directory, open '/home/student_03_c0686096dc2f/.npm/_cacache/tmp/git-cloneXbdr2v/mcp/package-lock.json'
+[Error - 2:14:05 PM] Failed to load entities from /home/student_03_c0686096dc2f/.npm/_cacache/tmp/git-cloneXbdr2v/mcp/package.json: Error: ENOENT: no such file or directory, open '/home/student_03_c0686096dc2f/.npm/_cacache/tmp/git-cloneXbdr2v/mcp/package.json'
+[Error - 2:14:05 PM] Failed to load entities from /home/student_03_c0686096dc2f/.npm/_cacache/tmp/git-cloneXbdr2v/mcp/tsconfig.json: Error: ENOENT: no such file or directory, open '/home/student_03_c0686096dc2f/.npm/_cacache/tmp/git-cloneXbdr2v/mcp/tsconfig.json'
+[Error - 2:14:05 PM] Failed to load entities from /home/student_03_c0686096dc2f/.npm/_cacache/tmp/git-clonegbdg2X/.agents/plugins/marketplace.json: Error: ENOENT: no such file or directory, open '/home/student_03_c0686096dc2f/.npm/_cacache/tmp/git-clonegbdg2X/.agents/plugins/marketplace.json'

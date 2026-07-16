@@ -1,0 +1,20 @@
+2026-07-16 13:14:29.332 [warning] Dir "/home/.pixi/envs" is not watchable (directory does not exist)
+2026-07-16 13:14:29.812 [info] Starting Environment refresh
+2026-07-16 13:14:29.813 [info] Starting Environment refresh
+2026-07-16 13:14:29.933 [info] Skipping ActivatedEnv Detection:  process.env.VSCODE_CLI !== '1'
+2026-07-16 13:14:29.933 [info] Skipping ActivatedEnv Detection:  process.env.VSCODE_CLI !== '1'
+2026-07-16 13:14:29.953 [info] > hatch env show --json
+2026-07-16 13:14:29.953 [info] cwd: .
+2026-07-16 13:14:29.983 [info] > conda info --json
+2026-07-16 13:14:30.010 [error] readdir() failed for "/home/lost+found" (Error: EACCES: permission denied, scandir '/home/lost+found')
+2026-07-16 13:14:30.010 [error] readdir() failed for "/home/lost+found" (Error: EACCES: permission denied, scandir '/home/lost+found')
+2026-07-16 13:14:30.073 [info] Environments refresh finished (event): 263 milliseconds
+2026-07-16 13:14:30.073 [info] Environments refresh finished (event): 260 milliseconds
+2026-07-16 13:14:30.073 [info] Environments refresh paths discovered: 263 milliseconds
+2026-07-16 13:14:30.073 [info] Environments refresh paths discovered: 260 milliseconds
+2026-07-16 13:14:30.078 [info] Environment refresh took 270 milliseconds
+2026-07-16 13:14:30.080 [info] Environment refresh took 267 milliseconds
+2026-07-16 13:14:30.098 [info] > pyenv which python
+2026-07-16 13:14:30.099 [info] cwd: .
+2026-07-16 13:14:30.243 [info] Python interpreter path: /bin/python
+2026-07-16 13:14:36.249 [info] Starting Jedi language server for home.
