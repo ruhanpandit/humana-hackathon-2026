@@ -98,6 +98,12 @@ def calculate_business_impact():
                 "value": f"-{impact['preventable_denials_reduction_pct']}%",
                 "delta": "Estimated",
                 "description": "Reduction in administrative errors"
+            },
+            {
+                "label": "STARs Gap Closure Improvement",
+                "value": f"+{impact['stars_gap_closure_improvement']} pp",
+                "delta": "Target",
+                "description": "Projected improvement in key STARs measures"
             }
         ],
         "financials": {
