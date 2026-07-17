@@ -1,9 +1,11 @@
 import os, sys, uuid, uvicorn
 from pathlib import Path
 from typing import Optional
-from fastapi import FastAPI
-from fastapi.responses import HTMLResponse
+from fastapi import FastAPI, UploadFile, File
+from fastapi.responses import HTMLResponse, Response
 from pydantic import BaseModel
+from google.cloud import speech
+import edge_tts
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
@@ -20,11 +22,16 @@ Agent.set_default_model(
 )
 runner = InMemoryRunner(agent=orchestrator_agent)
 
+speech_client = speech.SpeechClient()
+
 app = FastAPI()
 
 class Msg(BaseModel):
     message: str
     session_id: Optional[str] = None
+
+class TTSReq(BaseModel):
+    text: str
 
 @app.get("/", response_class=HTMLResponse)
 def root():
@@ -44,6 +51,28 @@ async def chat(req: Msg):
         return {"reply": text or "No response.", "session_id": sid}
     except Exception as e:
         return {"reply": f"Error: {e}", "session_id": sid}
+
+@app.post("/stt")
+async def stt(audio: UploadFile = File(...)):
+    content = await audio.read()
+    audio_obj = speech.RecognitionAudio(content=content)
+    config = speech.RecognitionConfig(
+        encoding=speech.RecognitionConfig.AudioEncoding.WEBM_OPUS,
+        sample_rate_hertz=48000,
+        language_code="en-US",
+    )
+    result = speech_client.recognize(config=config, audio=audio_obj)
+    transcript = " ".join(r.alternatives[0].transcript for r in result.results)
+    return {"transcript": transcript}
+
+@app.post("/tts")
+async def tts(req: TTSReq):
+    communicate = edge_tts.Communicate(req.text[:5000], "en-US-AriaNeural")
+    audio_chunks = []
+    async for chunk in communicate.stream():
+        if chunk["type"] == "audio":
+            audio_chunks.append(chunk["data"])
+    return Response(content=b"".join(audio_chunks), media_type="audio/mpeg")
 
 if __name__ == "__main__":
     uvicorn.run("app:app", host="0.0.0.0", port=8080, reload=False)
