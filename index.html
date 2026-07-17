@@ -34,10 +34,6 @@
       50%       { box-shadow: 0 0 0 6px rgba(220,38,38,0); }
     }
 
-    #speak-btn { width: 48px; padding: 0; font-size: 1.1rem; flex-shrink: 0; background: #0f172a; }
-    #speak-btn:hover { background: #1e293b; }
-    #speak-btn.muted { background: #64748b; }
-    #speak-btn.muted:hover { background: #475569; }
 
     #voice-status { font-size: .75rem; color: #94a3b8; padding: .15rem .5rem; white-space: nowrap; font-style: italic; min-width: 60px; }
   </style>
@@ -55,7 +51,6 @@
     <button id="mic-btn" title="Start voice input">🎤</button>
     <textarea id="input" placeholder="Type a message… (Enter to send, Shift+Enter for new line)"></textarea>
     <span id="voice-status"></span>
-    <button id="speak-btn" title="Toggle voice readback">🔊</button>
     <button id="send-btn" onclick="send()">Send</button>
   </div>
 
@@ -64,13 +59,11 @@
     let isRecording   = false;
     let mediaRecorder = null;
     let audioChunks   = [];
-    let autoSpeak     = true;
     let audioCtx      = null;   // Web Audio API context — unlocked on first gesture
 
     const input      = document.getElementById('input');
     const sendBtn    = document.getElementById('send-btn');
     const micBtn     = document.getElementById('mic-btn');
-    const speakBtn   = document.getElementById('speak-btn');
     const voiceStat  = document.getElementById('voice-status');
     const msgs       = document.getElementById('messages');
 
@@ -86,15 +79,6 @@
 
     input.addEventListener('keydown', e => {
       if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
-    });
-
-    // ── Speaker toggle ──────────────────────────────────────────────────────
-    speakBtn.addEventListener('click', () => {
-      unlockAudio();
-      autoSpeak = !autoSpeak;
-      speakBtn.textContent = autoSpeak ? '🔊' : '🔇';
-      speakBtn.classList.toggle('muted', !autoSpeak);
-      speakBtn.title = autoSpeak ? 'Toggle voice readback' : 'Voice readback off';
     });
 
     // ── Mic recording ────────────────────────────────────────────────────────
@@ -152,19 +136,27 @@
       micBtn.disabled = false;
     }
 
-    // ── TTS playback — uses browser-native SpeechSynthesis (no backend needed) ──
-    function speakText(text) {
-      if (!autoSpeak) return;
-      if (!window.speechSynthesis) { console.warn('SpeechSynthesis not supported'); return; }
-      window.speechSynthesis.cancel();
-      const utt = new SpeechSynthesisUtterance(text);
-      utt.lang  = 'en-US';
-      utt.rate  = 1.0;
-      utt.pitch = 1.0;
-      utt.onstart = () => setStatus('Speaking…');
-      utt.onend   = () => setStatus('');
-      utt.onerror = (e) => { console.error('SpeechSynthesis error:', e); setStatus(''); };
-      window.speechSynthesis.speak(utt);
+    // ── TTS playback — edge-tts neural voice via /tts endpoint ──────────────
+    async function speakText(text) {
+      setStatus('Speaking…');
+      try {
+        const res = await fetch('/tts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text }),
+        });
+        if (!res.ok) { setStatus(''); return; }
+        const buf     = await res.arrayBuffer();
+        const decoded = await audioCtx.decodeAudioData(buf);
+        const src     = audioCtx.createBufferSource();
+        src.buffer    = decoded;
+        src.connect(audioCtx.destination);
+        src.onended   = () => setStatus('');
+        src.start(0);
+      } catch (e) {
+        console.error('TTS error:', e);
+        setStatus('');
+      }
     }
 
     function setStatus(msg) { voiceStat.textContent = msg; }
@@ -200,7 +192,7 @@
         sessionId = data.session_id;
         thinking.textContent = data.reply;
         thinking.classList.remove('thinking');
-        speakText(data.reply);
+        await speakText(data.reply);
       } catch {
         thinking.textContent = 'Error: could not reach the server.';
         setStatus('');

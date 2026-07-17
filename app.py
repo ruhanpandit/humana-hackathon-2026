@@ -4,7 +4,8 @@ from typing import Optional
 from fastapi import FastAPI, UploadFile, File
 from fastapi.responses import HTMLResponse, Response
 from pydantic import BaseModel
-from google.cloud import speech, texttospeech
+from google.cloud import speech
+import edge_tts
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
@@ -22,7 +23,6 @@ Agent.set_default_model(
 runner = InMemoryRunner(agent=orchestrator_agent)
 
 speech_client = speech.SpeechClient()
-tts_client    = texttospeech.TextToSpeechClient()
 
 app = FastAPI()
 
@@ -67,18 +67,12 @@ async def stt(audio: UploadFile = File(...)):
 
 @app.post("/tts")
 async def tts(req: TTSReq):
-    synthesis_input = texttospeech.SynthesisInput(text=req.text[:5000])
-    voice = texttospeech.VoiceSelectionParams(
-        language_code="en-US",
-        name="en-US-Neural2-F",
-    )
-    audio_config = texttospeech.AudioConfig(
-        audio_encoding=texttospeech.AudioEncoding.MP3
-    )
-    resp = tts_client.synthesize_speech(
-        input=synthesis_input, voice=voice, audio_config=audio_config
-    )
-    return Response(content=resp.audio_content, media_type="audio/mpeg")
+    communicate = edge_tts.Communicate(req.text[:5000], "en-US-AriaNeural")
+    audio_chunks = []
+    async for chunk in communicate.stream():
+        if chunk["type"] == "audio":
+            audio_chunks.append(chunk["data"])
+    return Response(content=b"".join(audio_chunks), media_type="audio/mpeg")
 
 if __name__ == "__main__":
     uvicorn.run("app:app", host="0.0.0.0", port=8080, reload=False)
