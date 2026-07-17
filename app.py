@@ -8,8 +8,6 @@ from google.cloud import speech, texttospeech
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from tools.analyze_data import analyze_synthetic_data
-
 # Load agents
 from dotenv import load_dotenv; load_dotenv()
 from google.adk.runners import InMemoryRunner
@@ -34,10 +32,6 @@ class Msg(BaseModel):
 
 class TTSReq(BaseModel):
     text: str
-
-@app.get("/impact")
-def impact():
-    return analyze_synthetic_data()
 
 @app.get("/", response_class=HTMLResponse)
 def root():

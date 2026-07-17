@@ -65,6 +65,7 @@
     let mediaRecorder = null;
     let audioChunks   = [];
     let autoSpeak     = true;
+    let audioCtx      = null;   // Web Audio API context — unlocked on first gesture
 
     const input      = document.getElementById('input');
     const sendBtn    = document.getElementById('send-btn');
@@ -73,12 +74,23 @@
     const voiceStat  = document.getElementById('voice-status');
     const msgs       = document.getElementById('messages');
 
+    // Must be called inside a user-gesture handler so the AudioContext is
+    // granted autoplay permission. Once unlocked it stays unlocked forever,
+    // even across async boundaries like fetch().
+    function unlockAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+    }
+
     input.addEventListener('keydown', e => {
       if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
     });
 
     // ── Speaker toggle ──────────────────────────────────────────────────────
     speakBtn.addEventListener('click', () => {
+      unlockAudio();
       autoSpeak = !autoSpeak;
       speakBtn.textContent = autoSpeak ? '🔊' : '🔇';
       speakBtn.classList.toggle('muted', !autoSpeak);
@@ -89,6 +101,7 @@
     micBtn.addEventListener('click', toggleRecording);
 
     async function toggleRecording() {
+      unlockAudio(); // called synchronously inside the click handler
       if (isRecording) {
         mediaRecorder.stop();
         return;
@@ -139,25 +152,19 @@
       micBtn.disabled = false;
     }
 
-    // ── TTS playback ─────────────────────────────────────────────────────────
-    async function speakText(text) {
+    // ── TTS playback — uses browser-native SpeechSynthesis (no backend needed) ──
+    function speakText(text) {
       if (!autoSpeak) return;
-      setStatus('Speaking…');
-      try {
-        const res  = await fetch('/tts', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text }),
-        });
-        const blob = await res.blob();
-        const url  = URL.createObjectURL(blob);
-        const audio = new Audio(url);
-        audio.onended = () => { URL.revokeObjectURL(url); setStatus(''); };
-        audio.onerror = () => setStatus('');
-        audio.play();
-      } catch {
-        setStatus('');
-      }
+      if (!window.speechSynthesis) { console.warn('SpeechSynthesis not supported'); return; }
+      window.speechSynthesis.cancel();
+      const utt = new SpeechSynthesisUtterance(text);
+      utt.lang  = 'en-US';
+      utt.rate  = 1.0;
+      utt.pitch = 1.0;
+      utt.onstart = () => setStatus('Speaking…');
+      utt.onend   = () => setStatus('');
+      utt.onerror = (e) => { console.error('SpeechSynthesis error:', e); setStatus(''); };
+      window.speechSynthesis.speak(utt);
     }
 
     function setStatus(msg) { voiceStat.textContent = msg; }
@@ -173,6 +180,7 @@
     }
 
     async function send(overrideText) {
+      unlockAudio(); // unlock on Send button click too
       const text = overrideText ?? input.value.trim();
       if (!text) return;
 
@@ -192,8 +200,7 @@
         sessionId = data.session_id;
         thinking.textContent = data.reply;
         thinking.classList.remove('thinking');
-        setStatus('');
-        await speakText(data.reply);
+        speakText(data.reply);
       } catch {
         thinking.textContent = 'Error: could not reach the server.';
         setStatus('');
