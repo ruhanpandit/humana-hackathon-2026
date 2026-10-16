@@ -2,9 +2,10 @@
 
 AI-powered claims assistant for healthcare member services. A member or representative asks a question in plain English (typed or spoken), and the system routes it through specialized agents that look up claims, benefits, ROI authorization, and compliance risk, then returns a single plain-language answer with voice playback.
 
-Built at the **Humana Hackathon (July 2026)** by a team of 4:
+Built at the **Humana Hackathon (July 2026)** by a team of 5:
 
 - Bhoomi Patni
+- Dylan Kane
 - Ruhan Pandit
 - Sai Brinda Akuthota
 - Sanjit Kakaria
