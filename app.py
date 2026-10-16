@@ -15,7 +15,9 @@ from google.adk.runners import InMemoryRunner
 from google.adk import Agent
 from agents.orchestrator import orchestrator_agent
 
-PROJECT_ID = os.getenv("GOOGLE_CLOUD_PROJECT", "qwiklabs-gcp-01-f01da7845174")
+PROJECT_ID = os.getenv("GOOGLE_CLOUD_PROJECT")
+if not PROJECT_ID:
+    raise SystemExit("GOOGLE_CLOUD_PROJECT is not set. Copy .env.example to .env and fill in your project ID.")
 LOCATION   = os.getenv("GOOGLE_CLOUD_LOCATION", "us-central1")
 Agent.set_default_model(
     f"projects/{PROJECT_ID}/locations/{LOCATION}/publishers/google/models/gemini-2.5-flash"

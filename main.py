@@ -10,7 +10,9 @@ load_dotenv()
 
 # Use Vertex AI backend by specifying the full model path
 # This resolves "PERMISSION_DENIED" errors on the public Gemini API
-PROJECT_ID = os.getenv("GOOGLE_CLOUD_PROJECT", "qwiklabs-gcp-01-f01da7845174")
+PROJECT_ID = os.getenv("GOOGLE_CLOUD_PROJECT")
+if not PROJECT_ID:
+    raise SystemExit("GOOGLE_CLOUD_PROJECT is not set. Copy .env.example to .env and fill in your project ID.")
 LOCATION = os.getenv("GOOGLE_CLOUD_LOCATION", "us-central1")
 MODEL_PATH = f"projects/{PROJECT_ID}/locations/{LOCATION}/publishers/google/models/gemini-2.5-flash"
 Agent.set_default_model(MODEL_PATH)

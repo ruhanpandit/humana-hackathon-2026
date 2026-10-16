@@ -89,6 +89,12 @@ There is also a CLI REPL for testing without the web UI:
 python main.py
 ```
 
+### Example questions
+
+- "I'm calling about claim CLM000806. Why was it denied and can it be fixed?"
+- "Does member MBR00001's plan cover CPT 83036, and is prior authorization required?"
+- "I'm Daniel Barrett, calling for member MBR00001. Can you tell me about their recent claims?"
+
 ## Tech stack
 
 - **Agents:** Google Agent Development Kit (ADK) with Gemini 2.5 Flash on Vertex AI
@@ -96,3 +102,32 @@ python main.py
 - **Frontend:** Single-page HTML/CSS/JS (no build step)
 - **Speech-to-text:** Google Cloud Speech-to-Text
 - **Text-to-speech:** edge-tts
+
+## Project structure
+
+```
+.env.example                          # Environment variable template
+.gitignore
+README.md
+requirements.txt                      # Python dependencies
+app.py                                # FastAPI server with /chat, /stt, /tts endpoints
+main.py                               # CLI REPL for testing agents without the web UI
+index.html                            # Single-page chat and voice UI
+agents/
+    __init__.py
+    orchestrator.py                   # Root agent that routes to sub-agents
+    claim_story_agent.py              # Explains claim status, denials, and timelines
+    benefits_agent.py                 # Looks up coverage rules and cost-sharing details
+    roi_agent.py                      # Checks Release of Information authorization (HIPAA)
+    compliance_agent.py               # Scores claims for compliance risk
+tools/
+    __init__.py
+    healthcare_tools.py               # Tool functions called by agents (lookups, risk calc)
+    analyze_data.py                   # Data analysis utilities
+data/
+    hackathon_data.zip                # Original zipped dataset
+    structured/                       # CSV files: claims, members, providers, coverage, etc.
+    unstructured/
+        call_transcripts/             # Sample call transcript text files
+        stars_performance_report.md   # Star rating performance report
+```

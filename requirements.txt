@@ -1,0 +1,7 @@
+google-adk
+google-cloud-speech
+edge-tts
+fastapi
+uvicorn
+python-dotenv
+python-multipart
