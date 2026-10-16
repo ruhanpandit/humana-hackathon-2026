@@ -2,7 +2,7 @@ import csv
 import json
 import os
 
-DATA_DIR = "humana-hackathon-2026/data/structured"
+DATA_DIR = "data/structured"
 
 def analyze_synthetic_data():
     stats = {
